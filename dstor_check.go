@@ -156,7 +156,7 @@ func CheckStart(Sess1 *SessInfo, Sess2 *SessInfo, DirNum *sync.WaitGroup, Prefix
 func CheckBucketObject(Sess1 *SessInfo, Sess2 *SessInfo, Num int, Sess1Bucket string, Sess2Bucket string){
 	
 	var DirNum sync.WaitGroup
-	var PrefixCh = make(chan string, 10000)
+	var PrefixCh = make(chan string, 5120000)
 	var DoneCh = make(chan string)
 	PrefixCh <-""
 	DirNum.Add(1)
@@ -245,7 +245,7 @@ func main() {
 	flag.StringVar(&Did, "did", "", "dest AccessKeyId.")
 	flag.StringVar(&Dkey, "dkey", "", "dest SecretKey.")
 	flag.StringVar(&Db, "db", "", "dest Bucket name.")
-	flag.IntVar(&GoNum, "n", 5000, "Goroutines num.")
+	flag.IntVar(&GoNum, "n", 256, "Goroutines num.")
 	flag.BoolVar(&H, "h", false, "this help")
 	flag.Parse()
 	
