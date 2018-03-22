@@ -17,6 +17,8 @@ import (
 
 type SessInfo struct{
 	S3 *s3.S3
+	ObjMu sync.Mutex
+	DirMu sync.Mutex
 	ObjFile *os.File
 	DirFile *os.File
 }
@@ -107,12 +109,22 @@ func CurrentDir(Sess1 *SessInfo, Sess2 *SessInfo, DirNum *sync.WaitGroup, Prefix
 	
 	for name,v := range Object1Map{
 		//fmt.Println(name)
-		Sess1.ObjFile.WriteString(Sess1Bucket+" "+name+" "+v.mtime.UTC().Format(time.RFC3339)+" "+v.cptime.UTC().Format(time.RFC3339)+"\n")
+		Sess1.ObjMu.Lock()
+		_,err := Sess1.ObjFile.WriteString(Sess1Bucket+" "+name+" "+v.mtime.UTC().Format(time.RFC3339)+" "+v.cptime.UTC().Format(time.RFC3339)+"\n")
+		if nil != err{
+			panic(err)
+		}
+		Sess1.ObjMu.Unlock()
 	}
 	
 	for name,v := range Object2Map{
 		//fmt.Println(name)
-		Sess2.ObjFile.WriteString(Sess2Bucket+" "+name+" "+v.mtime.UTC().Format(time.RFC3339)+" "+v.cptime.UTC().Format(time.RFC3339)+" "+"\n")
+		Sess2.ObjMu.Lock()
+		_,err := Sess2.ObjFile.WriteString(Sess2Bucket+" "+name+" "+v.mtime.UTC().Format(time.RFC3339)+" "+v.cptime.UTC().Format(time.RFC3339)+" "+"\n")
+		if nil != err{
+			panic(err)
+		}
+		Sess2.ObjMu.Unlock()
 	}
 	
 	for k,_ := range Dir1Map{
@@ -126,12 +138,22 @@ func CurrentDir(Sess1 *SessInfo, Sess2 *SessInfo, DirNum *sync.WaitGroup, Prefix
 	
 	for name,_ := range Dir1Map{
 		//fmt.Println(name)
-		Sess1.DirFile.WriteString(Sess1Bucket+" "+name+"\n")
+		Sess1.DirMu.Lock()
+		_,err := Sess1.DirFile.WriteString(Sess1Bucket+" "+name+"\n")
+		if nil != err{
+			panic(err)
+		}
+		Sess1.DirMu.Unlock()
 	}
 	
 	for name,_ := range Dir2Map{
 		//fmt.Println(name)
-		Sess2.DirFile.WriteString(Sess2Bucket+" "+name+"\n")
+		Sess2.DirMu.Lock()
+		_,err := Sess2.DirFile.WriteString(Sess2Bucket+" "+name+"\n")
+		if nil != err{
+			panic(err)
+		}
+		Sess2.DirMu.Unlock()
 	}
 }
 func CheckStart(Sess1 *SessInfo, Sess2 *SessInfo, DirNum *sync.WaitGroup, PrefixCh chan string, DoneCh chan string, Num int, Sess1Bucket string, Sess2Bucket string){

@@ -17,6 +17,7 @@ import (
 
 type SessInfo struct{
 	S3 *s3.S3
+	ObjMu sync.Mutex
 	ObjFile *os.File
 	DirFile *os.File
 }
@@ -103,7 +104,12 @@ func CurrentDir(Sess1 *SessInfo, DirNum *sync.WaitGroup, Prefix string, PrefixCh
 	
 	for name,_ := range Object1Map{
 		//fmt.Println(name)
-		Sess1.ObjFile.WriteString(name+"\n")
+		Sess1.ObjMu.Lock()
+		_,err := Sess1.ObjFile.WriteString(name+"\n")
+		if nil != err{
+			panic(err)
+		}
+		Sess1.ObjMu.Unlock()
 	}
 	
 	for k,_ := range Dir1Map{
@@ -198,7 +204,7 @@ func main() {
 	   "" == Sid ||
 	   "" == Skey{
 		flag.Usage()
-		fmt.Println("Examples:\n dstor_check -sh 127.0.0.1:6081  -sid KD18D4O4SVHFS40TMA5D  -skey SPuJ2JRyYlg6KfIEX03MkZ46hHbRmqqEKn2IEJZR")
+		fmt.Println("Examples:\n dstor_list -sh 127.0.0.1:6081  -sid KD18D4O4SVHFS40TMA5D  -skey SPuJ2JRyYlg6KfIEX03MkZ46hHbRmqqEKn2IEJZR")
 		return
 	}
 	
